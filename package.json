@@ -2,13 +2,16 @@
   "name": "file-transfer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
+    "start": "electron ."
   },
   "keywords": [],
   "author": "Nish",
   "license": "ISC",
-  "devDependencies": {},
+  "devDependencies": {
+    "electron": "^11.3.0"
+  },
   "dependencies": {
     "hyperbeam": "^1.1.3"
   }
