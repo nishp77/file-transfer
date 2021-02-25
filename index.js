@@ -5,5 +5,8 @@ const Hyperbeam = require('hyperbeam')
 // once the other peer is discovered it is used to derive a noise keypair as well.
 const beam = new Hyperbeam('from mafintosh')
 
+//chat
+console.log("Let's Chat\n");
+
 // make a little chat app
 process.stdin.pipe(beam).pipe(process.stdout)
