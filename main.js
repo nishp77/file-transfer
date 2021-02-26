@@ -1,5 +1,8 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
+const Hyperbeam = require('hyperbeam')
+
+const beam = new Hyperbeam('from mafintosh')
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -34,5 +37,8 @@ ipcMain.on('file:path', (event, path) => {
             return;
         }
         console.log(data.toString())
-    })
+    });
+
+    let readStream = fs.createReadStream(path);
+    readStream.pipe(beam).pipe(process.stdout);
 });
