@@ -1,12 +1,11 @@
-const Hyperbeam = require('hyperbeam')
+const electron = require('electron');
+const {ipcRenderer} = electron;
 
-// 'from mafintosh' should be a somewhat unique topic used to derive a discovery key.
-// to find the other side of your pipe. it's seemed with a determistic timestamp from ~+-30min for better privacy
-// once the other peer is discovered it is used to derive a noise keypair as well.
-const beam = new Hyperbeam('from mafintosh')
+window.onload = () => {
 
-//chat
-console.log("Let's Chat\n");
-
-// make a little chat app
-process.stdin.pipe(beam).pipe(process.stdout)
+    document.querySelector('form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const {path} = document.querySelector('input').files[0];
+        ipcRenderer.send('file:path', path);
+    });
+}

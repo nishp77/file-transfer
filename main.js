@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron')
+const {app, BrowserWindow, ipcMain} = require('electron');
+const fs = require('fs');
 
-function createWindow () {
+function createWindow() {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -25,3 +26,13 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+ipcMain.on('file:path', (event, path) => {
+    fs.readFile(path, (error, data) => {
+        if (error) {
+            console.log(error)
+            return;
+        }
+        console.log(data.toString())
+    })
+});
