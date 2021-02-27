@@ -5,7 +5,12 @@ window.onload = () => {
 
     document.querySelector('form').addEventListener('submit', (event) => {
         event.preventDefault();
-        const {path} = document.querySelector('input').files[0];
-        ipcRenderer.send('file:path', path);
+        const files = document.querySelector('input').files;
+        for (let i = 0; i < files.length; i++)
+        {
+            const file = files[i];
+            console.log(file.path);
+            ipcRenderer.send('file:path', file.path);
+        }
     });
 }
