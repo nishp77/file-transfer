@@ -1,7 +1,7 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
 const Hyperbeam = require('hyperbeam');
-const zlib = require('zlib');
+const zip = require('cross-zip');
 
 const beam = new Hyperbeam('some')
 
@@ -35,9 +35,11 @@ ipcMain.on('file:path', (event, filePath) => {
 
     console.log(filePath[0]);
 
-    let gzip = zlib.createGzip();
     let readStream = fs.createReadStream(filePath[0]);
-    let out = fs.createWriteStream('hello.txt.gz');
-    readStream.pipe(gzip).pipe(out);
+
+    new Promise((resolve, reject) => {
+        zip.zip(filePath[0])
+    })
+
 
 });
