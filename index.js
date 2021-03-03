@@ -1,16 +1,17 @@
 const electron = require('electron');
 const {ipcRenderer} = electron;
 
+
 window.onload = () => {
 
     document.querySelector('form').addEventListener('submit', (event) => {
         event.preventDefault();
         const files = document.querySelector('input').files;
-        let filePath = [];
+        let file = [];
         for (let i = 0; i < files.length; i++)
         {
-            filePath[i] = files[i].path;
+            file[i] = new FileInfo(files[i].name,files[i].path);
         }
-        ipcRenderer.send('file:path', filePath);
+        ipcRenderer.send('file:path', file);
     });
 }

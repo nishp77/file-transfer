@@ -2,8 +2,11 @@ const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
 const Hyperbeam = require('hyperbeam');
 const zip = require('cross-zip');
+const path = require('path');
+const os = require('os');
 
 const beam = new Hyperbeam('some')
+let sourceStream = false;
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -31,15 +34,32 @@ app.on('activate', () => {
     }
 })
 
-ipcMain.on('file:path', (event, filePath) => {
+ipcMain.on('file:path', (event, file) => {
 
-    console.log(filePath[0]);
 
-    let readStream = fs.createReadStream(filePath[0]);
+    sourceStream = path.join(os.tmpdir(), file[0].fileName + '.zip');
 
     new Promise((resolve, reject) => {
-        zip.zip(filePath[0])
+        zip.zip(file[0].filePath, sourceStream, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        })
+    });
+
+    console.log(sourceStream);
+    send(sourceStream);
+
+    process.on('exit', () => {
+        fs.unlinkSync(sourceStream);
     })
 
-
 });
+
+function send() {
+    if (sourceStream) {
+        fs.createReadStream(sourceStream).pipe(beam).pipe(process.stdout);
+    }
+}
