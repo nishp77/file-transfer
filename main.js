@@ -36,6 +36,11 @@ app.on('activate', () => {
 
 ipcMain.on('file:path', (event, file) => {
 
+    for(let x in file)
+    {
+
+    }
+
 
     sourceStream = path.join(os.tmpdir(), file[0].fileName + '.zip');
 
