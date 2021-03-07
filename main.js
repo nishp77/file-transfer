@@ -1,3 +1,7 @@
+/**
+ * This is the main process
+ */
+
 const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
 const Hyperbeam = require('hyperbeam');
@@ -9,6 +13,7 @@ const beam = new Hyperbeam('some')
 let sourceStream = false;
 
 function createWindow() {
+    //Created browser window
     const win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -17,6 +22,7 @@ function createWindow() {
         }
     })
 
+    //load the hmtl within the browser window (render)
     win.loadFile('index.html')
 }
 
@@ -34,13 +40,10 @@ app.on('activate', () => {
     }
 })
 
+/**
+ * Listening for contents sent by the render process using IPC
+ */
 ipcMain.on('file:path', (event, file) => {
-
-    for(let x in file)
-    {
-
-    }
-
 
     sourceStream = path.join(os.tmpdir(), file[0].fileName + '.zip');
 
@@ -54,17 +57,23 @@ ipcMain.on('file:path', (event, file) => {
         })
     });
 
-    console.log(sourceStream);
-    send(sourceStream);
+    fs.access(sourceStream, fs.F_OK, err => {
+        if (err) {
+            console.error(err);
+        } else {
+            send(sourceStream);
+        }
+    });
 
     process.on('exit', () => {
         fs.unlinkSync(sourceStream);
-    })
+    });
 
 });
 
 function send() {
     if (sourceStream) {
+        console.log("**** Creating pipe *****");
         fs.createReadStream(sourceStream).pipe(beam).pipe(process.stdout);
     }
 }
