@@ -5,10 +5,13 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const fs = require('fs');
 const Hyperbeam = require('hyperbeam');
-const zip = require('cross-zip');
-const path = require('path');
 const os = require('os');
+const archiver = require('archiver');
 
+
+const archive = archiver('zip', {
+    zlib: {level: 9} // Sets the compression level.
+});
 const beam = new Hyperbeam('some')
 let sourceStream = false;
 
@@ -44,36 +47,42 @@ app.on('activate', () => {
  * Listening for contents sent by the render process using IPC
  */
 ipcMain.on('file:path', (event, file) => {
+    makeArchive(file);
+});
 
-    sourceStream = path.join(os.tmpdir(), file[0].fileName + '.zip');
+function makeArchive(files) {
+    const output = fs.createWriteStream(os.tmpdir() + '/test.zip');
 
-    new Promise((resolve, reject) => {
-        zip.zip(file[0].filePath, sourceStream, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        })
+    // listen for all archive data to be written
+    // 'close' event is fired only when a file descriptor is involved
+    output.on('close', function () {
+        console.log(archive.pointer() + ' total bytes');
+        console.log('archiver has been finalized and the output file descriptor has closed.');
     });
 
-    fs.access(sourceStream, fs.F_OK, err => {
+    for (let i = 0; i < files.length; i++) {
+        archive.append(fs.createReadStream(files[i].filePath), {name: files[i].fileName})
+    }
+
+    archive.pipe(output);
+    archive.finalize().then(() => {
+            fileExists(output.path);
+        }
+    );
+
+}
+
+function fileExists(filePath) {
+    fs.access(filePath, fs.F_OK, err => {
         if (err) {
             console.error(err);
         } else {
-            send(sourceStream);
+            send(filePath);
         }
     });
+}
 
-    process.on('exit', () => {
-        fs.unlinkSync(sourceStream);
-    });
-
-});
-
-function send() {
-    if (sourceStream) {
-        console.log("**** Creating pipe *****");
-        fs.createReadStream(sourceStream).pipe(beam).pipe(process.stdout);
-    }
+function send(filePath) {
+    console.log("**** Creating pipe *****");
+    fs.createReadStream(filePath).pipe(beam).pipe(process.stdout);
 }
